@@ -92,7 +92,7 @@ function App() {
       }
     });
     setAllData(updatedData); // Update allData
-    axios.post("http://localhost:5003/results", { results: updatedData })
+    axios.post("https://playbazar-online.onrender.com", { results: updatedData })
       .then((response) => {
         alert("Data Saved Successfully!");
         console.log("Data saved successfully:", response.data);
