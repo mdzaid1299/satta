@@ -29,7 +29,7 @@ function App() {
 
   useEffect(() => {
     // Fetch initial data from the server
-    axios.get("https://satta-git-satta-new-nilufa-khans-projects.vercel.app/results").then((response) => {
+    axios.get("https://satta-dun.vercel.app/results").then((response) => {
       setAllData(response.data.results); // Store all results data
       updateTableData(currentMonth, currentYear, response.data.results);
     });
@@ -92,7 +92,7 @@ function App() {
       }
     });
     setAllData(updatedData); // Update allData
-    axios.post("https://satta-git-satta-new-nilufa-khans-projects.vercel.app/results", { results: updatedData })
+    axios.post("https://satta-dun.vercel.app/results", { results: updatedData })
       .then((response) => {
         alert("Data Saved Successfully!");
         console.log("Data saved successfully:", response.data);
