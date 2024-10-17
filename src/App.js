@@ -4,6 +4,8 @@ import playbazaar from "./playbazaar.png";
 
 import axios from "axios"; // Import axios
 
+import { useAuth0 } from '@auth0/auth0-react';
+
 
 function App() {
 
@@ -20,20 +22,14 @@ function App() {
   const [selectedMonth, setSelectedMonth] = useState(currentMonth + 1); // +1 to match the dropdown value (1-12)
   const [selectedYear, setSelectedYear] = useState(currentYear);
 
-
-  const [isLoginVisible, setIsLoginVisible] = useState(false); // Login modal visibility
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Login state
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState(""); // For handling login errors
-
-
   const [tableData, setTableData] = useState([]);
   const [allData, setAllData] = useState([]); // Store all months' data
 
+  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
+
   useEffect(() => {
     // Fetch initial data from the server
-    axios.get("http://localhost:5001/results").then((response) => {
+    axios.get("http://localhost:5003/results").then((response) => {
       setAllData(response.data.results); // Store all results data
       updateTableData(currentMonth, currentYear, response.data.results);
     });
@@ -96,33 +92,15 @@ function App() {
       }
     });
     setAllData(updatedData); // Update allData
-    axios.post("http://localhost:5001/results", { results: updatedData })
+    axios.post("http://localhost:5003/results", { results: updatedData })
       .then((response) => {
+        alert("Data Saved Successfully!");
         console.log("Data saved successfully:", response.data);
+      })
+      .catch((error) => {
+        console.error("Error saving data:", error);
+        alert("Failed to save data.");
       });
-  };
-
-  const handleLogin = () => {
-    if (username === "admin" && password === "password") {
-      setIsLoggedIn(true);
-      setIsLoginVisible(false);
-      setLoginError(""); // Clear error if login is successful
-    } else {
-      setLoginError("Invalid username or password");
-    }
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUsername("");
-    setPassword("");
-  };
-
-
-
-  const closeModal = () => {
-    setIsLoginVisible(false);
-    setLoginError(""); // Reset error when modal is closed
   };
 
   useEffect(() => {
@@ -251,9 +229,9 @@ function App() {
                       <button
                         type="button"
                         className="btn btn-success"
-                        onClick={() => window.location.reload()}
+                        //onClick={() => window.location.reload()}
 
-
+                        onClick={() => updateTableData(selectedMonth, selectedYear, allData)}
                       >
                         Show Results
                       </button>
@@ -266,17 +244,20 @@ function App() {
                     <button type="button" onClick={printChart} className="btn btn-warning" style={{ marginRight: "10px", background: "#f0b848" }}>
                       Print Chart
                     </button>
-                    {!isLoggedIn ? (
+                    
+
+                    {!isAuthenticated ? (
                       <button
                         type="button"
                         className="btn btn-primary"
                         style={{ marginLeft: "10px" }}
-                        onClick={() => setIsLoginVisible(true)}
+                        onClick={loginWithRedirect}
                       >
                         Login
                       </button>
                     ) : (
                       <>
+
                         <button
                           type="button"
                           className="btn btn-success"
@@ -296,7 +277,8 @@ function App() {
                         <button
                           type="button"
                           className="btn btn-danger"
-                          onClick={handleLogout} // Call handleLogout to log out the user
+                          // onClick={handleLogout} // Call handleLogout to log out the user
+                          onClick={() => logout({ returnTo: window.location.origin })}
                           style={{ marginLeft: "10px" }}
                         >
                           Logout
@@ -330,7 +312,7 @@ function App() {
                     {tableData.map((game, gameIndex) => (
                       <tr key={gameIndex}>
                         <td>
-                          {isLoggedIn ? (
+                          {isAuthenticated ? (
                             <input
                               type="text"
                               value={game.game}
@@ -343,7 +325,7 @@ function App() {
                         </td>
                         {game.values.map((value, dayIndex) => (
                           <td key={dayIndex}>
-                            {isLoggedIn ? (
+                            {isAuthenticated ? (
                               <input
                                 type="text"
                                 value={value || ""}
@@ -450,46 +432,9 @@ function App() {
                   </button>
                 </a>
               </div>
-              {/* Login Modal */}
-              {isLoginVisible && (
-                <div className="modal-overlay">
-                  <div className="modal-content">
-                    <h3 style={{ "marginLeft": "10px" }} >Admin Login</h3>
-                    <button className="close-button" onClick={closeModal}>
-                      &times;
-                    </button>
-                    <div className="modal-body">
-                      <div>
-                        <label htmlFor="username">Username:</label>
-                        <input
-                          type="text"
-                          id="username"
-                          value={username}
-                          onChange={(e) => setUsername(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="password">Password:</label>
-                        <input
-                          type="password"
-                          id="password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                        />
-                      </div>
-                      {loginError && <p className="error">{loginError}</p>}
-                      <div className="modal-footer">
-                        <button className="btn btn-primary" onClick={handleLogin}>
-                          Login
-                        </button>
-                        <button className="btn btn-secondary" onClick={closeModal}>
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+
+
+
               <div
                 className="panel-footer"
                 style={{
