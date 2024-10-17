@@ -1,22 +1,27 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
 import playbazaar from "./playbazaar.png";
-
 import axios from "axios"; // Import axios
-
-import { useAuth0 } from '@auth0/auth0-react';
-
+import { useAuth0 } from "@auth0/auth0-react";
 
 function App() {
-
   const [currentDateTime, setCurrentDateTime] = useState("");
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth(); // 0-11
   const currentYear = currentDate.getFullYear(); // e.g., 2024
-
   const [months] = useState([
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ]);
   // State to store selected month and year
   const [selectedMonth, setSelectedMonth] = useState(currentMonth + 1); // +1 to match the dropdown value (1-12)
@@ -25,23 +30,31 @@ function App() {
   const [tableData, setTableData] = useState([]);
   const [allData, setAllData] = useState([]); // Store all months' data
 
-  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
+  const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
 
   useEffect(() => {
-    // Fetch initial data from the server
-    axios.get("http://localhost:5003/results").then((response) => {
-      setAllData(response.data.results); // Store all results data
-      updateTableData(currentMonth, currentYear, response.data.results);
-    });
+    axios
+      .get("https://playbazar-online.onrender.com")
+      .then((response) => {
+        const data = response.data.results || []; // Safeguard against undefined
+        setAllData(data); // Store all results data
+        updateTableData(currentMonth + 1, currentYear, data); // +1 for month 1-12
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
   }, []);
 
-  // Function to update tableData based on selected month and year
   const updateTableData = (month, year, data) => {
-    const filteredData = data.filter(item => {
-      return item.year === year && item.month === month; // Assuming data has month/year
+    if (!data || data.length === 0) {
+      setTableData([{ game: "New Game", values: Array(31).fill("") }]);
+      return;
+    }
+
+    const filteredData = data.filter((item) => {
+      return item.year === year && item.month === month;
     });
 
-    // If no data for selected month/year, provide a default row
     if (filteredData.length === 0) {
       setTableData([{ game: "New Game", values: Array(31).fill("") }]);
     } else {
@@ -73,15 +86,17 @@ function App() {
     const updatedData = [...allData]; // Start with existing allData
 
     // Loop through the current table data to update allData
-    tableData.forEach(game => {
-      // Find index of existing data for the same month/year
-      const existingIndex = updatedData.findIndex(item =>
-        item.month === selectedMonth && item.year === selectedYear && item.game === game.game
+    tableData.forEach((game) => {
+      const existingIndex = updatedData.findIndex(
+        (item) =>
+          item.month === selectedMonth &&
+          item.year === selectedYear &&
+          item.game === game.game
       );
 
       // If exists, update it; if not, add it
       if (existingIndex > -1) {
-        updatedData[existingIndex].values = game.values; // Update existing
+        updatedData[existingIndex].values = game.values;
       } else {
         updatedData.push({
           game: game.game,
@@ -91,8 +106,11 @@ function App() {
         });
       }
     });
+
     setAllData(updatedData); // Update allData
-    axios.post("http://localhost:5003/results", { results: updatedData })
+
+    axios
+      .post("https://playbazar-online.onrender.com", { results: updatedData })
       .then((response) => {
         alert("Data Saved Successfully!");
         console.log("Data saved successfully:", response.data);
@@ -101,7 +119,7 @@ function App() {
         console.error("Error saving data:", error);
         alert("Failed to save data.");
       });
-  };
+  }; // <-- This closing bracket was missing
 
   useEffect(() => {
     const updateDateTime = () => {
@@ -118,8 +136,6 @@ function App() {
     return () => clearInterval(intervalId);
   }, []);
 
-
-
   const printChart = () => {
     const printContents = document.getElementById("printableArea").innerHTML;
     const originalContents = document.body.innerHTML;
@@ -134,8 +150,6 @@ function App() {
   useEffect(() => {
     updateTableData(selectedMonth, selectedYear, allData);
   }, [selectedMonth, selectedYear, allData]);
-
-
   return (
     <div className="App">
       <div className="blue-border-container">
@@ -158,23 +172,15 @@ function App() {
 
           <meta name="robots" content="no index, no follow" />
 
-
           <link
             rel="stylesheet"
             href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
           />
 
-
-
           <div className="panel panel-signin" style={{ width: "98%" }}>
             <div className="panel-body" style={{ padding: "25px" }}>
               <div className="logo text-center">
-                <img
-                  src={playbazaar}
-                  alt="Play Bazaar"
-                  width="30%"
-                  height
-                />
+                <img src={playbazaar} alt="Play Bazaar" width="30%" height />
               </div>
               <div className="container">
                 <div className="container-fluid">
@@ -202,7 +208,9 @@ function App() {
                       onChange={(e) => setSelectedMonth(Number(e.target.value))}
                     >
                       {months.map((month, index) => (
-                        <option key={index} value={index + 1}>{month}</option>
+                        <option key={index} value={index + 1}>
+                          {month}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -213,15 +221,18 @@ function App() {
                         id="dd_year"
                         className="form-control"
                         value={selectedYear} // Set the current year
-                        onChange={(e) => setSelectedYear(Number(e.target.value))}
+                        onChange={(e) =>
+                          setSelectedYear(Number(e.target.value))
+                        }
                       >
                         {/* You can adjust the range of years as needed */}
-                        {[2020, 2021, 2022, 2023, 2024].map(year => (
-                          <option key={year} value={year}>{year}</option>
+                        {[2020, 2021, 2022, 2023, 2024].map((year) => (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
                         ))}
                       </select>
                     </div>
-
                   </div>
 
                   <div className="col-sm-1">
@@ -231,7 +242,9 @@ function App() {
                         className="btn btn-success"
                         //onClick={() => window.location.reload()}
 
-                        onClick={() => updateTableData(selectedMonth, selectedYear, allData)}
+                        onClick={() =>
+                          updateTableData(selectedMonth, selectedYear, allData)
+                        }
                       >
                         Show Results
                       </button>
@@ -241,10 +254,14 @@ function App() {
                 </form>
                 <div className="col-sm-6">
                   <div className="input-group mb15">
-                    <button type="button" onClick={printChart} className="btn btn-warning" style={{ marginRight: "10px", background: "#f0b848" }}>
+                    <button
+                      type="button"
+                      onClick={printChart}
+                      className="btn btn-warning"
+                      style={{ marginRight: "10px", background: "#f0b848" }}
+                    >
                       Print Chart
                     </button>
-                    
 
                     {!isAuthenticated ? (
                       <button
@@ -257,7 +274,6 @@ function App() {
                       </button>
                     ) : (
                       <>
-
                         <button
                           type="button"
                           className="btn btn-success"
@@ -278,23 +294,18 @@ function App() {
                           type="button"
                           className="btn btn-danger"
                           // onClick={handleLogout} // Call handleLogout to log out the user
-                          onClick={() => logout({ returnTo: window.location.origin })}
+                          onClick={() =>
+                            logout({ returnTo: window.location.origin })
+                          }
                           style={{ marginLeft: "10px" }}
                         >
                           Logout
                         </button>
                       </>
                     )}
-
-
                   </div>
                 </div>
-
-
-
-
               </div>
-
 
               <br />
               <div className="row"> </div>
@@ -316,7 +327,9 @@ function App() {
                             <input
                               type="text"
                               value={game.game}
-                              onChange={(e) => handleGameNameChange(gameIndex, e.target.value)}
+                              onChange={(e) =>
+                                handleGameNameChange(gameIndex, e.target.value)
+                              }
                               style={{ width: "100%" }}
                             />
                           ) : (
@@ -329,7 +342,13 @@ function App() {
                               <input
                                 type="text"
                                 value={value || ""}
-                                onChange={(e) => handleInputChange(gameIndex, dayIndex, e.target.value)}
+                                onChange={(e) =>
+                                  handleInputChange(
+                                    gameIndex,
+                                    dayIndex,
+                                    e.target.value
+                                  )
+                                }
                                 style={{ width: "100%" }}
                               />
                             ) : (
@@ -341,9 +360,7 @@ function App() {
                     ))}
                   </tbody>
                 </table>
-
               </div>
-
             </div>
             <div>
               <p>...Paid Advertisment...</p>
@@ -377,8 +394,8 @@ function App() {
                 </p2>
                 <hr />
                 <p style={{ "font-size": "22px", color: "#0D092A" }}>
-                  घर पर रह कर ऑनलाइन गेम खेलिए भरोसा आपका जिम्मेदारी हमारी
-                  ! <br />
+                  घर पर रह कर ऑनलाइन गेम खेलिए भरोसा आपका जिम्मेदारी हमारी !{" "}
+                  <br />
                   नोट - आप यह क्रॉसिंग भी प्ले कर सकते है, रेट 10 का 970
                 </p>
                 <hr />
@@ -433,8 +450,6 @@ function App() {
                 </a>
               </div>
 
-
-
               <div
                 className="panel-footer"
                 style={{
@@ -449,20 +464,18 @@ function App() {
                 />
                 <small>
                   <p />
-                  Disclaimer:- PLAYBAZAAR.ONLINE : We Follow All Countries
-                  Rules The Site is Only For Entertainment Purposes.{" "}
-                  <br /> The Site Does Not Promote any Betting Activity.
-                  People From Countries Where Gambling is Banned Should
-                  Block Our Site immediately.
-                  <br /> If you are Not Agreed/satisfied With Our Terms
-                  &amp; Conditions Please Quit Right Now. PLAYBAZAAR.ONLINE
-                  All Rights Reserved Thank you.*{" "}
+                  Disclaimer:- PLAYBAZAAR.ONLINE : We Follow All Countries Rules
+                  The Site is Only For Entertainment Purposes. <br /> The Site
+                  Does Not Promote any Betting Activity. People From Countries
+                  Where Gambling is Banned Should Block Our Site immediately.
+                  <br /> If you are Not Agreed/satisfied With Our Terms &amp;
+                  Conditions Please Quit Right Now. PLAYBAZAAR.ONLINE All Rights
+                  Reserved Thank you.*{" "}
                 </small>{" "}
                 <p />
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
