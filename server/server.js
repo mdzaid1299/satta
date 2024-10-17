@@ -22,13 +22,13 @@ const saveData = (data) => {
 };
 
 // Get results
-app.get("/results", (req, res) => {
+app.get("/server/data", (req, res) => {
   const data = loadData();
   res.json(data);
 });
 
 // Update results
-app.post("/results", (req, res) => {
+app.post("/server/data", (req, res) => {
   const newData = req.body;
   saveData(newData);
   res.json(newData);
@@ -38,3 +38,6 @@ app.post("/results", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on https://playbazar-online.onrender.com`);
 });
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://www.playbazar.online/']
+}));

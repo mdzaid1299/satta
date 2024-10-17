@@ -110,7 +110,7 @@ function App() {
     setAllData(updatedData); // Update allData
 
     axios
-      .post("https://playbazar-online.onrender.com", { results: updatedData })
+      .post("https://playbazar-online.onrender.com/server/data", { results: updatedData })
       .then((response) => {
         alert("Data Saved Successfully!");
         console.log("Data saved successfully:", response.data);
