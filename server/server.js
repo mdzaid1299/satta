@@ -36,5 +36,5 @@ app.post("/results", (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on https://satta-dun.vercel.app:${PORT}`);
+  console.log(`Server running on https://satta-4ruo.vercel.app:${PORT}`);
 });
