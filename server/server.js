@@ -38,3 +38,6 @@ app.post("/results", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on https://playbazar-online.onrender.com`);
 });
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://www.playbazar.online/']
+}));
