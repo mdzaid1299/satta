@@ -22,13 +22,13 @@ const saveData = (data) => {
 };
 
 // Get results
-app.get("/server/data", (req, res) => {
+app.get("/results", (req, res) => {
   const data = loadData();
   res.json(data);
 });
 
 // Update results
-app.post("/server/data", (req, res) => {
+app.post("/results", (req, res) => {
   const newData = req.body;
   saveData(newData);
   res.json(newData);

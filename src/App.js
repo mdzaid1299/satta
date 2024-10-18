@@ -34,7 +34,7 @@ function App() {
 
   useEffect(() => {
     axios
-      .get("https://playbazar-online.onrender.com")
+      .get("https://playbazar-online.onrender.com/results")
       .then((response) => {
         const data = response.data.results || []; // Safeguard against undefined
         setAllData(data); // Store all results data
@@ -110,7 +110,7 @@ function App() {
     setAllData(updatedData); // Update allData
 
     axios
-      .post("https://playbazar-online.onrender.com/server/data", { results: updatedData })
+      .post("https://playbazar-online.onrender.com/results", { results: updatedData })
       .then((response) => {
         alert("Data Saved Successfully!");
         console.log("Data saved successfully:", response.data);
