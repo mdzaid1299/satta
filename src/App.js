@@ -48,7 +48,7 @@ function App() {
 
   useEffect(() => {
     // Fetch initial data from the server
-    axios.get("http://localhost:5003/results").then((response) => {
+    axios.get("https://satta-backend-fa5w.onrender.com/results").then((response) => {
       setAllData(response.data.results); // Store all results data
       updateTableData(currentMonth, currentYear, response.data.results);
     });
@@ -111,7 +111,7 @@ function App() {
       }
     });
     setAllData(updatedData); // Update allData
-    axios.post("http://localhost:5003/results", { results: updatedData })
+    axios.post("https://satta-backend-fa5w.onrender.com/results", { results: updatedData })
       .then((response) => {
         alert("Data Saved Successfully!");
         console.log("Data saved successfully:", response.data);

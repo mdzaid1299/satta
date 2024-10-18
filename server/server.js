@@ -5,11 +5,15 @@ const fs = require("fs");
 const path = require("path");
 
 const app = express();
-const PORT = 5003;
+const PORT = process.env.PORT || 5003;
 
 app.use(cors());
 app.use(bodyParser.json());
 
+const corsOptions = {
+  origin: 'https://satta-dun.vercel.app', // Allow requests from this origin
+};
+app.use(cors(corsOptions));
 // Load data from JSON file
 const loadData = () => {
   const data = fs.readFileSync(path.join(__dirname, "data.json"));
